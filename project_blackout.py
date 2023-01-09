@@ -1,6 +1,7 @@
 """
-Reads excel file
-For each provider, blacks out each date onto another excel file
+Takes in an excel file with group shift stats on a particular month
+Takes as input another excel file as a request graph
+For each provider matching provider, blacksout each date onto another excel file along with an indicator text marking 'w' for work concatenated with extra text if shift ends at 8pm or later
 """
 
 import pandas as pd
@@ -64,7 +65,10 @@ def process_request_data(df, PATH_req_graph):
         name = row['Provider']
         day = row['Date'].day
         end_time = row['end_time']
-        late_times = ['20:00:00', '21:00:00', '22:00:00', '23:00:00', '01:00:00', '02:00:00', '06:00:00']
+
+        # TODO create a datetime object to simplify below
+
+        late_times = ['20:00:00', '21:00:00', '22:00:00', '23:00:00', '00:00:00','01:00:00', '02:00:00', '06:00:00']
 
         
         # if provider is in df_r, otherwise add
