@@ -113,7 +113,7 @@ def fill_cells(PATH_req_graph, PATH_request_processed1):
         [[cell.fill.start_color.index  for cell in row] for row in sh.iter_rows(min_col=2, max_col=(sh.max_column-4), min_row=3, max_row=(sh.max_row - 4))]
     )) 
 
-    color_d = {'10': '00C0C0C0' ,'11':'00808080', '9': 'ff8b94', '00000000': '00FFFFFF' }
+    color_d = {'10': '00C0C0C0' ,'11':'00808080', '12':'00b200','9': 'ff8b94', '00000000': '00FFFFFF' }
 
     for row in sh_r.iter_rows(min_col=2, max_col=(sh_r.max_column - 1), min_row=2, max_row=(sh_r.max_row)):
         key = row[0].value
@@ -130,7 +130,9 @@ def fill_cells(PATH_req_graph, PATH_request_processed1):
         except KeyError:
             pass
     
-    PATH_export = os.path.abspath(r'C:\Users\Angel\Downloads\group_assigned_shifts_and_requests.xlsx')
+    now = datetime.now()
+    s = f'{now.month}_{now.day}_{now.hour}{now.minute}'
+    PATH_export = os.path.abspath(fr'C:\Users\Angel\Downloads\{s}group_assigned_shifts_and_requests.xlsx')
     wb_r.save(filename = PATH_export)
 
 if __name__ == "__main__":
