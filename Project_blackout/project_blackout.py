@@ -19,10 +19,6 @@ def main():
     inp2 = input(f"Please input location path of request graph: ")
     PATH_req_graph = fr"{return_path(inp2)}"
 
-    # PATH_request_processed1 = os.path.abspath(
-    #     r"C:\Users\Angel\anaconda3\envs\pandas_processed1.xlsx"
-    # )
-
     df1 = return_df(PATH_group_stats)
     df2 = return_df(PATH_req_graph)
 
@@ -35,12 +31,8 @@ def main():
     print(f"SUCCESS! Saved as : group_assigned_shifts_and_requests.xlsx ")
 
 
-def strip_string(s):
-    return s.strip()[1:-1]
-
-
-def return_path(p):
-    return os.path.abspath(strip_string(p))
+def return_path(x):
+    return os.path.abspath(x.strip()[1:-1])
 
 
 def return_df(p):
@@ -137,7 +129,7 @@ def fill_cells(PATH_req_graph, df_r):
 
     df_r.to_excel("pandas_processed1.xlsx")
     sh_r, wb_r = load_sheets("pandas_processed1.xlsx", "temp2.xslx", "Sheet1")
-    
+
 
     # get  dict(hex_data) for each provider for each cell
     provider_hex_d = dict(
