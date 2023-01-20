@@ -9,54 +9,71 @@ import numpy as np
 
 
 def main():
-    prompt = input(f"Copy your selection. Make sure to include row of days.  Press enter when ready. Or enter path of excel file: ")
+    prompt = input(
+        f"Copy your selection. Make sure to include row of days.  Press enter when ready. Or enter path of excel file: "
+    )
 
-    df = None
-    if not prompt:
-        print(f"going selection")
-        df = read_selection()
-        print(df)
-    
-    else:
-        prompt = prompt.strip()[1:-1]
-        formats = ('.xls','xlsx')
-        if prompt.endswith(formats):
-            df = read_excel_to_df(prompt)
-        else:
-            print(f"file error")
-
-    process(df)
+    df = check_prompt(prompt)
+    d_psd1 = create_dict_provshift_dates(df)
+    d_psd2 = process(d_psd1)
+    write_df_csv(d_psd2)
 
     print(f"Done, it is NOW SAVED TO YOUR CLIPBOARD.  Paste starting with 'shift'")
 
 
+def check_prompt(prompt):
+    if not prompt:
+        print(f"Taken off Clipboard! ")
+        df = read_selection()
+
+    else:
+        prompt = prompt.strip()[1:-1]
+        formats = (".xls", "xlsx")
+        if prompt.endswith(formats):
+            df = read_excel_to_df(prompt)
+        else:
+            print(f"file error")
+    return df
+
+
 def read_selection():
     return pd.read_clipboard(skiprows=[1])
-    
+
+
 def read_excel_to_df(PATH_1):
     return pd.read_excel(PATH_1, index_col=0)
 
+
 def path_to_csv_template():
     prompt = input(f"Please enter path to this month's csv template: ")
-    prompt = prompt.strip()[1:-1]
-    return os.path.abspath(fr"{prompt}")
+    return os.path.abspath(fr"{prompt.strip()[1:-1]}")
 
 
-def process(df):
+def get_csv_template_df():
+    # read csv template data and send as df
+    prompt = input(f"Please enter path to this month's csv template: ")
+    PATH = os.path.abspath(fr"{prompt.strip()[1:-1]}")
+    return pd.read_csv(PATH, header=9, index_col=1)
 
-    shift_names = ["F.D", "F.N", "B.D", "B.N", "S.D", "S.N", "C.D", "C.N"]
 
-    csv_code = {
-        "F.D": "SRDHWF F.D",
-        "F.N": "SRDHWF F.N",
-        "B.D": "SRDHBD B.D",
-        "B.N": "SRDHBD B.N",
-        "S.D": "SRDHS S.D",
-        "S.N": "SRDHS S.N",
-        "C.D": "SRDHNL C.D",
-        "C.N": "SRDHNL C.N",
-        None: None,
-    }
+def clean_up(inp):
+    # cleans up text if there's a 24 or lower case or period at the start or end
+    s = inp
+    if s:
+        s = s.upper().strip()
+        if s.endswith("."):
+            s = s[:-1]
+
+        if s.startswith("."):
+            s = s[1:]
+
+        if "24" in s or ".-" in s:
+            s = "F.D-F.N"
+
+    return s
+
+
+def create_dict_provshift_dates(df):
 
     provider_sadmin_names = {
         "Christopher Cheng": "C. Cheng",
@@ -138,34 +155,63 @@ def process(df):
         "Schon Roberts": "S. Roberts",
         "Jesse Wells": "J. Wells",
     }
-
-    
+    # Creates a dictionary with User and names of shift
     df = df.replace(r"^\s*$", np.nan, regex=True)
     df["provider"] = df.User
-    df.provider = df["provider"].map(lambda x: provider_sadmin_names.get(x,None))
+    df.provider = df["provider"].map(lambda x: provider_sadmin_names.get(x, None))
     df = df.set_index("provider")
-    df = df.drop(columns='User')
+    df = df.drop(columns="User")
+    df = df.replace({np.nan: None})
 
-    # lets create a dictionary with User and names of shift
-    d_psd = {}
-    for row in df.iterrows():
-        k, v = row[0], row[1].tolist()
-        d_psd[k] = v
+    d_psd = {row[0]: row[1].tolist() for row in df.iterrows()}
+    return d_psd
+
+
+def process(d_psd):
+
+    shift_names = [
+        "F.D",
+        "F.N",
+        "B.D",
+        "B.N",
+        "S.D",
+        "S.N",
+        "C.D",
+        "C.N",
+        "F.24",
+        "F.D-F.N",
+    ]
 
     # modifies the list to only include shift names or None
     for k, v in d_psd.items():
         temp_v = []
         for elem in v:
-            if elem in shift_names or ("-" in str(elem)):
-                temp_v.append(elem)
+            if clean_up(elem) in shift_names:
+                temp_v.append(clean_up(elem))
+
             else:
                 temp_v.append(None)
         d_psd[k] = temp_v
 
-    # read csv template data
-    PATH_2 = path_to_csv_template()
-    df_csv = pd.read_csv(PATH_2, header=9, index_col=1)
+    return d_psd
 
+
+def write_df_csv(d_psd):
+    csv_code = {
+        "F.D": "SRDHWF F.D",
+        "F.N": "SRDHWF F.N",
+        "B.D": "SRDHBD B.D",
+        "B.N": "SRDHBD B.N",
+        "S.D": "SRDHS S.D",
+        "S.N": "SRDHS S.N",
+        "C.D": "SRDHNL C.D",
+        "C.N": "SRDHNL C.N",
+        None: None,
+    }
+
+    df_csv = get_csv_template_df()
+
+    # writes into df_csv
     for provider, list_shifts in d_psd.items():
         for day, p_shift in enumerate(list_shifts, start=1):
             if p_shift:
@@ -178,7 +224,7 @@ def process(df):
                 else:
                     df_csv.at[csv_code[p_shift], str(day)] = provider
 
-    df_csv = df_csv.drop(columns=['ID'])
+    df_csv = df_csv.drop(columns=["ID"])
 
     df_csv.to_clipboard()
 
