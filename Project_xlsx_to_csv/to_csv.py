@@ -15,6 +15,7 @@ def main():
     if not prompt:
         print(f"going selection")
         df = read_selection()
+        print(df)
     
     else:
         prompt = prompt.strip()[1:-1]
@@ -30,7 +31,7 @@ def main():
 
 
 def read_selection():
-    return pd.read_clipboard()
+    return pd.read_clipboard(skiprows=[1])
     
 def read_excel_to_df(PATH_1):
     return pd.read_excel(PATH_1, index_col=0)
@@ -140,9 +141,10 @@ def process(df):
 
     
     df = df.replace(r"^\s*$", np.nan, regex=True)
-    df["provider"] = df.index
-    df.provider = df["provider"].map(lambda x: provider_sadmin_names[x])
+    df["provider"] = df.User
+    df.provider = df["provider"].map(lambda x: provider_sadmin_names.get(x,None))
     df = df.set_index("provider")
+    df = df.drop(columns='User')
 
     # lets create a dictionary with User and names of shift
     d_psd = {}
