@@ -112,25 +112,14 @@ def process_request_data(df, df2):
         # write onto the cell with an indicator
         indicator = "w"
         if str(end_time.time()) in late_times:
-            indicator += " til" + str(end_time.time())[:5]
+            indicator += "til" + str(end_time.time())[:5]
         df_r.at[provider_index, str(day)] = indicator
-
-    # save excel file
-    # df_r.to_excel("pandas_processed1.xlsx")
 
     return df_r
 
 
 # TODO add prior month day columns ~3 days +/- shade
-
-
-def fill_cells(PATH_req_graph, df_r):
-    sh, _ = load_sheets(PATH_req_graph, "temp.xslx", "Request Graph")
-
-    df_r.to_excel("pandas_processed1.xlsx")
-    sh_r, wb_r = load_sheets("pandas_processed1.xlsx", "temp2.xslx", "Sheet1")
-
-
+def get_dict_hex_data(sh):
     # get  dict(hex_data) for each provider for each cell
     provider_hex_d = dict(
         zip(
@@ -151,7 +140,13 @@ def fill_cells(PATH_req_graph, df_r):
             ],
         )
     )
+    return provider_hex_d
 
+def fill_cells(PATH_req_graph, df_r):
+    sh, _ = load_sheets(PATH_req_graph, "temp.xslx", "Request Graph")
+    df_r.to_excel("pandas_processed1.xlsx")
+    sh_r, wb_r = load_sheets("pandas_processed1.xlsx", "temp2.xslx", "Sheet1")
+    provider_hex_d = get_dict_hex_data(sh)
     color_d = {
         "10": "00C0C0C0",
         "11": "00808080",
