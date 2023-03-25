@@ -154,6 +154,9 @@ def create_dict_provshift_dates(df):
         "Juan Reynoso": "J. Reynoso",
         "Schon Roberts": "S. Roberts",
         "Jesse Wells": "J. Wells",
+        "Patrick Flaherty": "P. Flaherty",
+        "Michael Rushton": "M. Rushton",
+        
     }
     # Creates a dictionary with User and names of shift
     df = df.replace(r"^\s*$", np.nan, regex=True)

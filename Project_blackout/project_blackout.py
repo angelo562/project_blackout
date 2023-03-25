@@ -149,9 +149,9 @@ def fill_cells(PATH_req_graph, df_r):
     provider_hex_d = get_dict_hex_data(sh)
     color_d = {
         "10": "00C0C0C0",
-        "11": "00808080",
+        "11": "800080", # 11 is specific time off dates
         "12": "00b200",
-        "9": "ff8b94",
+        "9": "ff8b94", #9 is blackout dates
         "00000000": "00FFFFFF",
     }
 
