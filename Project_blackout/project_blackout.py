@@ -1,7 +1,7 @@
 """
 Takes in an excel file with group shift stats on a particular month
 Takes as input another excel file as a request graph
-For each provider matching provider, blacksout each date onto another excel file along with an indicator text marking 'w' for work concatenated with extra text if shift ends at 8pm or later
+For each provider matching provider, blacksout each date onto another excel file along with an indicator text marking 'w' for work concatenated with extra text if shift ends at 7pm or later
 """
 
 import pandas as pd
@@ -96,6 +96,7 @@ def process_request_data(df, df2):
             "01:00:00",
             "02:00:00",
             "06:00:00",
+            "07:00:00",
         ]
 
         # if provider is in df_r, otherwise add
